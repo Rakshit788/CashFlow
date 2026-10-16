@@ -143,6 +143,7 @@ Implement:
 
 ### 3.3 Agent Tools
 Tools for financial data retrieval:
+- `getInvestigationContext(exceptionId)` - exception, invoice/payment balances, and similar cases in one call
 - `getExceptionDetails(exceptionId)` - full context
 - `getCustomerInvoices(customerId, limit?)` - history
 - `getInvoicePayments(invoiceId)` - allocations
@@ -151,15 +152,20 @@ Tools for financial data retrieval:
 - `calculateBalances(invoiceId)` - recompute
 - `getSimilarExceptions(exceptionId)` - patterns
 
-- [ ] Tool implementations with validation
-- [ ] Tool registry
+- [x] Tool implementations with validation
+- [x] Tool registry
+- [x] Bundle the initial investigation context; execute independent PostgreSQL reads concurrently
+- [x] Cache similar-exception history in Redis for 15 seconds; keep current financial balances on PostgreSQL
 - [ ] **Commit:** `feat(agent): add financial data tools`
 
 ### 3.4 Agent Logic
-- [ ] Analyze exception - gather evidence via tools
-- [ ] Generate structured recommendation: action (hold/release/adjust/approve_manual), confidence, rationale, evidence_refs[], suggested_adjustments
-- [ ] Evidence validation - ensure claims backed by data
-- [ ] Save investigation result with evidence trail
+- [x] Analyze exception - gather evidence via tools
+- [x] Generate structured recommendation: action (hold/release/adjust/approve_manual), confidence, rationale, evidence_refs[], suggested_adjustments
+- [x] Evidence validation - ensure claims backed by data
+- [x] Save investigation result with evidence trail
+- [x] Record agent duration, tool-call count, and cache hits/misses in logs and audit metadata
+- [ ] Add a replayable, labeled evaluation set and compare recommendation quality across prompt/model versions
+- [ ] Add vector retrieval for unstructured remittance advice and historical analyst notes
 - [ ] **Commit:** `feat(agent): implement investigation logic`
 
 ---
