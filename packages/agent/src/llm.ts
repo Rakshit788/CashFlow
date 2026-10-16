@@ -35,11 +35,15 @@ export interface ProviderConfig {
 }
 
 export function loadProviderConfig(env: NodeJS.ProcessEnv = process.env): ProviderConfig {
+  const provider = (env.LLM_PROVIDER || 'openai').toLowerCase();
   return {
-    provider: (env.LLM_PROVIDER || 'openai').toLowerCase(),
-    model: env.LLM_MODEL || 'gpt-4o-mini',
-    apiKey: env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY || env.LLM_API_KEY,
-    baseUrl: env.LLM_BASE_URL,
+    provider,
+    model: env.LLM_MODEL || (provider === 'gemini' ? 'gemini-2.5-flash' : 'gpt-4o-mini'),
+    apiKey:
+      provider === 'gemini'
+        ? env.GEMINI_API_KEY || env.LLM_API_KEY
+        : env.OPENAI_API_KEY || env.ANTHROPIC_API_KEY || env.LLM_API_KEY,
+    baseUrl: env.LLM_BASE_URL || (provider === 'gemini' ? 'https://generativelanguage.googleapis.com/v1beta/openai' : undefined),
     maxTokens: parseInt(env.LLM_MAX_TOKENS || '2000', 10),
     temperature: parseFloat(env.LLM_TEMPERATURE || '0.1'),
   };
@@ -67,7 +71,7 @@ async function postJson(url: string, headers: Record<string, string>, body: unkn
 }
 
 export class OpenAIProvider implements LLMProvider {
-  readonly name = 'openai';
+  readonly name: string = 'openai';
   readonly model: string;
   private apiKey: string;
   private baseUrl: string;
@@ -127,6 +131,10 @@ export class OpenAIProvider implements LLMProvider {
 
     return { content: msg.content ?? null, toolCalls };
   }
+}
+
+export class GeminiProvider extends OpenAIProvider {
+  override readonly name = 'gemini';
 }
 
 export class AnthropicProvider implements LLMProvider {
@@ -201,5 +209,6 @@ export class AnthropicProvider implements LLMProvider {
 export function createProvider(cfg: ProviderConfig = loadProviderConfig()): LLMProvider | null {
   if (!cfg.apiKey) return null;
   if (cfg.provider === 'anthropic') return new AnthropicProvider(cfg);
+  if (cfg.provider === 'gemini') return new GeminiProvider(cfg);
   return new OpenAIProvider(cfg);
 }
