@@ -47,6 +47,16 @@ invoice, allocation, and balance data always comes from PostgreSQL. A cache outa
 as a miss and never blocks the investigation. Each run records duration, tool-call count, and
 cache hit/miss counts in the completion audit event and worker log.
 
+### Semantic remittance retrieval
+The project uses pgvector inside PostgreSQL to search synthetic remittance text when invoice
+references are fuzzy or payment memos are ambiguous. Embeddings use the OpenAI-compatible
+embeddings endpoint and can be indexed with `npm run index-remittance -w @cashflow/agent`.
+The indexer only embeds fixed synthetic notes for the five built-in seed customers; it does
+not send invoice balances, payment references, or other database transaction data to the
+embedding API. Retrieved notes are leads, and the agent has to verify exact financial facts
+with PostgreSQL tools. If the embedding key or vector extension is unavailable, search returns
+an unavailable result and the agent can continue with its exact-data tools.
+
 ### Agent replay evaluation
 `packages/agent/src/evaluate.ts` creates a small labeled set of synthetic finance cases,
 runs the configured agent against each case, and prints a JSON report with expected versus

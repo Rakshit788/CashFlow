@@ -166,7 +166,7 @@ Tools for financial data retrieval:
 - [x] Record agent duration, tool-call count, and cache hits/misses in logs and audit metadata
 - [x] Add a replayable, labeled evaluation set and compare recommendation quality across provider/model runs
 - [x] Require a dedicated evaluation database and clean up only uniquely named synthetic fixtures
-- [ ] Add vector retrieval for unstructured remittance advice and historical analyst notes
+- [x] Add pgvector retrieval for synthetic remittance notes; require exact PostgreSQL verification before action
 - [ ] **Commit:** `feat(agent): implement investigation logic`
 
 ---
