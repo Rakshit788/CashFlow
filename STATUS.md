@@ -55,6 +55,7 @@ The entire feature work exists only in the working tree. Run `git add -A && git 
 - [x] `src/llm.ts` — `LLMProvider` interface, `loadProviderConfig()`, `OpenAIProvider`, `AnthropicProvider`, `createProvider()` (returns null if no key)
 - [x] `src/tools.ts` — 8 tools implemented, including `getInvestigationContext` for a bundled initial read; independent invoice/payment/history reads run concurrently
 - [x] Redis caches only similar-exception history for 15 seconds; current invoice, payment, and balance data always comes from PostgreSQL
+- [x] `src/evaluate.ts` — labeled replay CLI with a dedicated-database guard, expected-action scoring, and JSON report (provider/model, confidence, evidence, duration, tool/cache metrics)
 - [x] `src/schema.ts` — `RecommendationSchema`, `SuggestedAdjustmentSchema` (Zod)
 - [x] `src/agent.ts` — `SYSTEM_PROMPT`, `runLlmAgent()` (tool-calling loop), `runRuleBasedAgent()` (deterministic fallback), `runAgent()` (LLM → fallback); includes duration, tool-call, and cache metrics
 - [x] `src/investigate.ts` — `runInvestigation()`: runs agent, updates DB, auto-resolves on `release`, else creates approval + audit + outbox events
@@ -159,7 +160,8 @@ The entire feature work exists only in the working tree. Run `git add -A && git 
 - [x] Bundle exception, invoice, payment, and similar-exception context for the initial agent read
 - [x] Cache similar-exception history briefly in Redis; bypass cache for current financial balances
 - [x] Record duration, tool-call count, and cache hit/miss metrics in logs and audit metadata
-- [ ] Add a labeled replay/evaluation set to measure accuracy, escalation quality, latency, and regressions
+- [x] Add a labeled replay/evaluation set on an isolated database to measure expected-action accuracy and latency by exception type
+- [ ] Compare prompt/model versions and track regression history across saved evaluation reports
 - [ ] Add vector retrieval for remittance text and analyst notes (no unstructured document source/index exists yet)
 - [ ] `stream` method on `LLMProvider` — plan mentioned streaming; interface only has `complete`
 - [ ] LLM response retry / repair loop when Zod validation fails on the first attempt

@@ -164,7 +164,8 @@ Tools for financial data retrieval:
 - [x] Evidence validation - ensure claims backed by data
 - [x] Save investigation result with evidence trail
 - [x] Record agent duration, tool-call count, and cache hits/misses in logs and audit metadata
-- [ ] Add a replayable, labeled evaluation set and compare recommendation quality across prompt/model versions
+- [x] Add a replayable, labeled evaluation set and compare recommendation quality across provider/model runs
+- [x] Require a dedicated evaluation database and clean up only uniquely named synthetic fixtures
 - [ ] Add vector retrieval for unstructured remittance advice and historical analyst notes
 - [ ] **Commit:** `feat(agent): implement investigation logic`
 

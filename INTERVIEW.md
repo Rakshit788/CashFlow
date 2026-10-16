@@ -47,6 +47,27 @@ invoice, allocation, and balance data always comes from PostgreSQL. A cache outa
 as a miss and never blocks the investigation. Each run records duration, tool-call count, and
 cache hit/miss counts in the completion audit event and worker log.
 
+### Agent replay evaluation
+`packages/agent/src/evaluate.ts` creates a small labeled set of synthetic finance cases,
+runs the configured agent against each case, and prints a JSON report with expected versus
+actual action, confidence, provider/model, evidence count, duration, and tool/cache metrics.
+The runner requires `EVALUATION_DATABASE_URL` to point to a database whose name contains
+`eval`; it creates and cleans up only its own uniquely named fixtures. This lets us compare
+rule-based and configured LLM runs on the same case definitions without touching the demo DB.
+
+Run it from PowerShell after creating the dedicated database:
+
+```powershell
+$env:EVALUATION_DATABASE_URL = "postgresql://cashflow:cashflow@localhost:5432/cashflow_eval"
+$env:DATABASE_URL = $env:EVALUATION_DATABASE_URL
+npm run build:packages
+npm run migrate
+npm run evaluate -w @cashflow/agent
+```
+
+The output is JSON on stdout, so runs can be saved and compared with shell redirection. The
+agent uses the deterministic fallback when no LLM key is configured.
+
 ### Human-in-the-loop approvals
 Only `release` auto-resolves. Adjustments, holds, and amounts above `APPROVAL_THRESHOLD`
 become `approvals` requiring an approver. The action executor (simulated ERP integration)
