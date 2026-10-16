@@ -9,8 +9,8 @@
 
 | Fact | Detail |
 |---|---|
-| Branch | `main`, 17 commits ahead of `origin/main`, **nothing pushed** |
-| Last commit | `822bd6e chore(docker): add backend container builds` |
+| Branch | `main`; local commits have not been pushed |
+| Last commit | See `git log -1` for the current head |
 | Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
 | **Not committed** | None; working tree clean |
 
