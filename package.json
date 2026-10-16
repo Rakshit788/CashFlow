@@ -7,9 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
-    "dev": "npm run dev --workspaces",
-    "lint": "npm run lint --workspaces",
-    "test": "npm run test --workspaces"
+    "build:packages": "npm run build -w @cashflow/shared && npm run build -w @cashflow/db && npm run build -w @cashflow/queue && npm run build -w @cashflow/agent",
+    "build": "npm run build:packages && npm run build -w @cashflow/api && npm run build -w @cashflow/worker && npm run build -w @cashflow/web",
+    "migrate": "npm run migrate -w @cashflow/db",
+    "seed": "npm run seed -w @cashflow/db",
+    "detect": "node packages/db/dist/reconciliation.js",
+    "dev:api": "npm run dev -w @cashflow/api",
+    "dev:worker": "npm run dev -w @cashflow/worker",
+    "dev:web": "npm run dev -w @cashflow/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "docker:up": "docker compose up -d postgres redis",
+    "docker:down": "docker compose down"
   }
 }
