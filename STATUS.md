@@ -10,9 +10,9 @@
 | Fact | Detail |
 |---|---|
 | Branch | `main`; local commits have not been pushed |
-| Last commit | `e4111b5` — default Gemini to a model available to new users |
+| Latest implementation commit | `4ceaec8` — preserve Gemini tool-call thought signatures |
 | Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
-| **Not committed** | Gemini thought-signature preservation fix and this verification update |
+| **Not committed** | None |
 
 **Verification (2026-10-17):** The replacement Gemini key is present locally and a generic generation probe succeeded with `gemini-3.8-flash`. The seven-case isolated replay scored 7/7, but Gemini free-tier quota (5 requests/minute) was exhausted during the run, so those cases used the deterministic fallback; this is not an LLM evaluation result. The Gemini tool-call adapter now preserves `extra_content.google.thought_signature` as required for Gemini 3 tool round trips; the agent package TypeScript build passed. A full workspace build reached Next.js but failed with Windows `EPERM` writing under `apps/web/.next`, and `npm test` has no workspace test scripts. The read-only API health and exceptions endpoints responded successfully. A Gemini-backed replay and live worker run remain unverified; the normal compose worker was not started because it may process real queued finance records and send them to Google.
 
