@@ -10,11 +10,13 @@
 | Fact | Detail |
 |---|---|
 | Branch | `main`; local commits have not been pushed |
-| Last commit | See `git log -1` for the current head |
+| Last commit | `e4111b5` — default Gemini to a model available to new users |
 | Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
 | **Not committed** | None; working tree clean |
 
-**Build:** `npm run build` completed successfully. Tests were not run. The pgvector migration and synthetic remittance indexer still need to be applied/run against a pgvector-enabled database to activate semantic retrieval.
+**Verification (2026-10-17):** `npm run build` passed. `npm test` exits successfully but no workspace test scripts are defined. The isolated seven-case agent replay passed 7/7 using the deterministic fallback. API health/list checks and an API → outbox → Redis/BullMQ → worker investigation smoke test passed. Migration `003_remittance_vectors.sql` is applied to the local database; the synthetic remittance indexer has not been run. Gemini model listing authenticated, but text generation returned 503 and then timed out, so live Gemini investigations remain unverified.
+
+**Local runtime:** Postgres, Redis, and API are running. One fallback-only worker is running for UI testing; the normal Gemini-configured worker is stopped until the exposed local Gemini key is replaced. Existing demo rows were preserved; the seed reset was not run.
 
 ---
 
@@ -50,7 +52,7 @@
 - [x] `src/index.ts` — `QUEUE_INVESTIGATIONS`, `QUEUE_NOTIFICATIONS`, `JOB_INVESTIGATE_EXCEPTION` constants; `createRedisConnection()`, `createQueue()`
 
 ### `packages/agent`
-- [x] `src/llm.ts` — `LLMProvider` interface, `loadProviderConfig()`, `OpenAIProvider`, `AnthropicProvider`, `createProvider()` (returns null if no key)
+- [x] `src/llm.ts` — `LLMProvider` interface, `loadProviderConfig()`, OpenAI, Anthropic, and Gemini (OpenAI-compatible) providers; `createProvider()` returns null if no key
 - [x] `src/tools.ts` — 9 tools implemented, including bundled context and customer-scoped semantic remittance search; independent invoice/payment/history reads run concurrently
 - [x] Redis caches only similar-exception history for 15 seconds; current invoice, payment, and balance data always comes from PostgreSQL
 - [x] `src/evaluate.ts` — labeled replay CLI with a dedicated-database guard, expected-action scoring, and JSON report (provider/model, confidence, evidence, duration, tool/cache metrics)
@@ -146,7 +148,7 @@
 - [ ] **CI pipeline** — no GitHub Actions / CI config
 - [ ] **Auto-migrate on deploy** — compose does not run migrations or seed on startup; README instructs manual `docker compose exec`
 - [ ] **Healthchecks for api/worker/web in compose** — only postgres and redis have healthchecks
-- [ ] **Push to remote** — 4 local commits are ahead of `origin/main`; all Phase 2–6 work is untracked
+- [ ] **Push to remote** — local commits are ahead of `origin/main`; work remains local
 
 ### P4 — Code hygiene (dead / unused code)
 - [ ] `packages/shared/src/schemas.ts` — schemas never imported (routes define inline Zod schemas)
