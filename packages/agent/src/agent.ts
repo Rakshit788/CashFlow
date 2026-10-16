@@ -17,6 +17,9 @@ Use the provided tools to gather evidence. Start with getInvestigationContext, w
 3. The customer's payments and how much of each has been applied.
 4. Similar exceptions for the same customer (patterns).
 Use other tools only when you need to inspect or verify a specific record.
+When a remittance reference or payment memo is ambiguous, use searchRemittanceAdvice to find
+candidate notes for this customer. Treat semantic matches as leads only; verify invoice IDs,
+payment IDs, and amounts against the exact financial tools before recommending an action.
 
 Then produce a final answer as STRICT JSON only (no markdown fences) matching:
 {

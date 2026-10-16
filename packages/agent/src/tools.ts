@@ -1,4 +1,5 @@
 import { query } from '@cashflow/db';
+import { createEmbeddings, toVectorLiteral } from './embeddings';
 import type { AgentCache } from './types';
 
 export interface ToolDefinition {
@@ -8,6 +9,19 @@ export interface ToolDefinition {
 }
 
 export const toolDefinitions: ToolDefinition[] = [
+  {
+    name: 'searchRemittanceAdvice',
+    description:
+      'Search this customer\'s remittance notes semantically when invoice references or payment memos are ambiguous. Treat results as candidate evidence and verify IDs and amounts with the exact finance tools.',
+    parameters: {
+      type: 'object',
+      properties: {
+        exceptionId: { type: 'number' },
+        query: { type: 'string' },
+      },
+      required: ['exceptionId', 'query'],
+    },
+  },
   {
     name: 'getInvestigationContext',
     description:
@@ -98,6 +112,33 @@ export async function executeTool(
   cacheStats?: { hits: number; misses: number }
 ): Promise<unknown> {
   switch (name) {
+    case 'searchRemittanceAdvice': {
+      const exceptionRows = await query<{ customer_id: number }>(
+        'SELECT customer_id FROM exceptions WHERE id = $1',
+        [args.exceptionId]
+      );
+      if (exceptionRows.length === 0) return { matches: [] };
+
+      try {
+        const [embedding] = await createEmbeddings([String(args.query ?? '')]);
+        const matches = await query(
+          `SELECT id, payment_id, content,
+                  1 - (embedding <=> $1::vector) AS similarity
+           FROM remittance_documents
+           WHERE customer_id = $2
+           ORDER BY embedding <=> $1::vector
+           LIMIT 5`,
+          [toVectorLiteral(embedding), exceptionRows[0].customer_id]
+        );
+        return { matches };
+      } catch (error) {
+        return {
+          available: false,
+          reason: error instanceof Error ? error.message : 'Vector search is unavailable.',
+          matches: [],
+        };
+      }
+    }
     case 'getInvestigationContext': {
       const exceptionRows = await query<{
         id: number;

@@ -5,7 +5,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "evaluate": "node dist/evaluate.js"
+    "evaluate": "node dist/evaluate.js",
+    "index-remittance": "node dist/indexRemittance.js"
   },
   "dependencies": {
     "@cashflow/db": "*",
