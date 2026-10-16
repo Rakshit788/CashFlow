@@ -38,7 +38,7 @@ export function loadProviderConfig(env: NodeJS.ProcessEnv = process.env): Provid
   const provider = (env.LLM_PROVIDER || 'openai').toLowerCase();
   return {
     provider,
-    model: env.LLM_MODEL || (provider === 'gemini' ? 'gemini-2.5-flash' : 'gpt-4o-mini'),
+    model: env.LLM_MODEL || (provider === 'gemini' ? 'gemini-3.8-flash' : 'gpt-4o-mini'),
     apiKey:
       provider === 'gemini'
         ? env.GEMINI_API_KEY || env.LLM_API_KEY
