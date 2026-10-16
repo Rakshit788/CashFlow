@@ -12,11 +12,11 @@
 | Branch | `main`; local commits have not been pushed |
 | Last commit | `e4111b5` — default Gemini to a model available to new users |
 | Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
-| **Not committed** | None; working tree clean |
+| **Not committed** | Gemini thought-signature preservation fix and this verification update |
 
-**Verification (2026-10-17):** `npm run build` passed. `npm test` exits successfully but no workspace test scripts are defined. The isolated seven-case agent replay passed 7/7 using the deterministic fallback. API health/list checks and an API → outbox → Redis/BullMQ → worker investigation smoke test passed. Migration `003_remittance_vectors.sql` is applied to the local database; the synthetic remittance indexer has not been run. Gemini model listing authenticated, but text generation returned 503 and then timed out, so live Gemini investigations remain unverified.
+**Verification (2026-10-17):** The replacement Gemini key is present locally and a generic generation probe succeeded with `gemini-3.8-flash`. The seven-case isolated replay scored 7/7, but Gemini free-tier quota (5 requests/minute) was exhausted during the run, so those cases used the deterministic fallback; this is not an LLM evaluation result. The Gemini tool-call adapter now preserves `extra_content.google.thought_signature` as required for Gemini 3 tool round trips; the agent package TypeScript build passed. A full workspace build reached Next.js but failed with Windows `EPERM` writing under `apps/web/.next`, and `npm test` has no workspace test scripts. The read-only API health and exceptions endpoints responded successfully. A Gemini-backed replay and live worker run remain unverified; the normal compose worker was not started because it may process real queued finance records and send them to Google.
 
-**Local runtime:** Postgres, Redis, and API are running. One fallback-only worker is running for UI testing; the normal Gemini-configured worker is stopped until the exposed local Gemini key is replaced. Existing demo rows were preserved; the seed reset was not run.
+**Local runtime:** Postgres, Redis, API, and the fallback-only worker are running. The normal Gemini-configured worker remains stopped because it may process real queued finance records. Existing demo rows were preserved; the seed reset was not run.
 
 ---
 
@@ -52,7 +52,7 @@
 - [x] `src/index.ts` — `QUEUE_INVESTIGATIONS`, `QUEUE_NOTIFICATIONS`, `JOB_INVESTIGATE_EXCEPTION` constants; `createRedisConnection()`, `createQueue()`
 
 ### `packages/agent`
-- [x] `src/llm.ts` — `LLMProvider` interface, `loadProviderConfig()`, OpenAI, Anthropic, and Gemini (OpenAI-compatible) providers; `createProvider()` returns null if no key
+- [x] `src/llm.ts` — `LLMProvider` interface, `loadProviderConfig()`, OpenAI, Anthropic, and Gemini (OpenAI-compatible) providers; preserves Gemini tool-call thought signatures; `createProvider()` returns null if no key
 - [x] `src/tools.ts` — 9 tools implemented, including bundled context and customer-scoped semantic remittance search; independent invoice/payment/history reads run concurrently
 - [x] Redis caches only similar-exception history for 15 seconds; current invoice, payment, and balance data always comes from PostgreSQL
 - [x] `src/evaluate.ts` — labeled replay CLI with a dedicated-database guard, expected-action scoring, and JSON report (provider/model, confidence, evidence, duration, tool/cache metrics)

@@ -4,6 +4,7 @@ export interface ToolCall {
   id: string;
   name: string;
   arguments: Record<string, unknown>;
+  thoughtSignature?: string;
 }
 
 export interface ChatMessage {
@@ -101,6 +102,9 @@ export class OpenAIProvider implements LLMProvider {
             tool_calls: m.tool_calls.map((tc) => ({
               id: tc.id,
               type: 'function',
+              ...(tc.thoughtSignature
+                ? { extra_content: { google: { thought_signature: tc.thoughtSignature } } }
+                : {}),
               function: { name: tc.name, arguments: JSON.stringify(tc.arguments) },
             })),
           };
@@ -127,6 +131,7 @@ export class OpenAIProvider implements LLMProvider {
       id: tc.id,
       name: tc.function?.name,
       arguments: parseArgs(tc.function?.arguments),
+      thoughtSignature: tc.extra_content?.google?.thought_signature,
     }));
 
     return { content: msg.content ?? null, toolCalls };
