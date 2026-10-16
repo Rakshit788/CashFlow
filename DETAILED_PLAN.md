@@ -318,4 +318,7 @@ But implement incrementally, committing often.
 
 ## Next Steps
 
-Start with Phase 1.1: Initialize monorepo. Let me do that now.
+1. Start PostgreSQL from the pgvector-enabled image and apply migrations.
+2. Seed the synthetic dataset, detect exceptions, and index synthetic remittance notes with an embedding key.
+3. Run the agent replay evaluator against a dedicated database whose name contains `eval`.
+4. Compare provider/model runs and save reports to track regressions.

@@ -9,14 +9,12 @@
 
 | Fact | Detail |
 |---|---|
-| Branch | `main`, 4 commits ahead of `origin/main`, **nothing pushed** |
-| Last commit | `c2b89fd chore: add package-lock` |
-| Committed so far | Phase 1 (db schema, migrations, reconciliation, shared types) + scaffolding |
-| **Not committed** | Everything from Phases 2–6: all of `apps/`, `packages/agent/`, `packages/queue/`, `docs/`, `Dockerfile`, `README.md`, `INTERVIEW.md`, `.dockerignore`, `packages/db/migrations/002_phase5.sql` |
+| Branch | `main`, 17 commits ahead of `origin/main`, **nothing pushed** |
+| Last commit | `822bd6e chore(docker): add backend container builds` |
+| Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
+| **Not committed** | None; working tree clean |
 
-**Modified but uncommitted:** `.env.example`, `docker-compose.yml`, `package.json`, `package-lock.json`, `packages/db/src/db.ts`.
-
-The entire feature work exists only in the working tree. Run `git add -A && git commit` before anything else — otherwise a clean checkout loses Phases 2–6.
+**Build:** `npm run build` completed successfully. Tests were not run. The pgvector migration and synthetic remittance indexer still need to be applied/run against a pgvector-enabled database to activate semantic retrieval.
 
 ---
 
