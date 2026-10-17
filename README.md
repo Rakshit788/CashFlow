@@ -11,7 +11,7 @@ actions — with an idempotent, audited, transactional-outbox backend.
 - Rule-based exception detection: unapplied payments, partial/amount mismatches,
   overpayments, duplicate payments, timing/collection issues.
 - Express REST API with Zod validation, RBAC, and idempotent write endpoints.
-- LLM agent with a tool-calling loop over financial data (OpenAI / Anthropic adapter),
+- LLM agent with a tool-calling loop over financial data (local Ollama by default; OpenAI / Anthropic compatible adapters),
   plus a deterministic **rule-based fallback** so the demo works without an API key.
 - pgvector semantic retrieval for synthetic remittance notes; the agent verifies retrieved
   candidate references against current PostgreSQL invoice and payment balances.
@@ -33,7 +33,7 @@ actions — with an idempotent, audited, transactional-outbox backend.
 | Dashboard | Next.js 15 (App Router), React 19, Tailwind CSS |
 | Queue | BullMQ + Redis |
 | Database | PostgreSQL 16 + pgvector (`node-postgres`, plain SQL migrations) |
-| LLM | OpenAI / Anthropic adapters (raw fetch), OpenAI embeddings, and rule-based fallback |
+| LLM | Ollama in Docker (Qwen 3 1.7B), OpenAI-compatible adapter, optional OpenAI embeddings, and rule-based fallback |
 
 ## Repository Structure
 
@@ -58,14 +58,13 @@ cashflow/
 ### Option A — Docker (everything)
 
 ```bash
-# provide an LLM key (optional; omit to use the rule-based fallback)
-export OPENAI_API_KEY=sk-...        # PowerShell: $env:OPENAI_API_KEY="sk-..."
-
 docker compose up --build
+# first run only: download the local model into the persistent Ollama volume
+docker compose exec ollama ollama pull qwen3:1.7b
 docker compose exec api node packages/db/dist/migrate.js
 docker compose exec api node packages/db/dist/seed.js
 docker compose exec api node packages/db/dist/reconciliation.js   # detect exceptions
-docker compose exec api npm run index-remittance -w @cashflow/agent  # optional; requires OPENAI_API_KEY
+docker compose exec api npm run index-remittance -w @cashflow/agent  # optional; requires OPENAI_EMBEDDING_API_KEY
 ```
 
 - Dashboard: http://localhost:3000
@@ -73,17 +72,18 @@ docker compose exec api npm run index-remittance -w @cashflow/agent  # optional;
 
 ### Option B — Local dev
 
-Prerequisites: Node 20+, and Postgres + Redis (use `npm run docker:up` to start just
-those).
+Prerequisites: Node 20+, and Docker for Postgres, Redis, and Ollama.
 
 ```bash
 cp .env.example .env      # then edit if needed
+npm run docker:up         # start Postgres, Redis, and Ollama
+docker compose exec ollama ollama pull qwen3:1.7b  # first run only
 npm install
 npm run build:packages
 npm run migrate           # create schema
 npm run seed              # generate synthetic data
 npm run detect            # create exceptions
-npm run index-remittance -w @cashflow/agent  # optional vector index; requires OPENAI_API_KEY
+npm run index-remittance -w @cashflow/agent  # optional vector index; requires OPENAI_EMBEDDING_API_KEY
 
 npm run dev:api           # terminal 1  -> http://localhost:3001
 npm run dev:worker        # terminal 2
@@ -100,8 +100,8 @@ See `.env.example`. Key variables:
 | `REDIS_URL` | Redis connection string |
 | `PORT` | API port (default 3001) |
 | `NEXT_PUBLIC_API_URL` | API base URL used by the dashboard |
-| `LLM_PROVIDER` / `LLM_MODEL` / `OPENAI_API_KEY` | LLM configuration |
-| `OPENAI_BASE_URL` / `OPENAI_EMBEDDING_MODEL` | Optional embedding endpoint and model for remittance retrieval |
+| `LLM_PROVIDER` / `LLM_MODEL` / `LLM_BASE_URL` | Local Ollama model configuration (default `qwen3:1.7b`) |
+| `OPENAI_EMBEDDING_API_KEY` / `OPENAI_BASE_URL` / `OPENAI_EMBEDDING_MODEL` | Optional external embedding service for remittance retrieval; leave key blank to keep requests local |
 | `APPROVAL_THRESHOLD` | Amount above which adjustments require approval |
 | `MAX_JOB_ATTEMPTS` | Worker retry limit |
 | `OUTBOX_POLL_INTERVAL_MS` | Outbox publisher poll interval |

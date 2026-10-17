@@ -14,7 +14,7 @@ Given the requirements (Postgres, Redis/BullMQ, Next.js, Express, LLM), recommen
 - **Shared**: TypeScript packages for types, schemas, utils (packages/shared, packages/db)
 - **Database**: PostgreSQL 16+
 - **Queue**: Redis 7+
-- **LLM**: OpenAI/Anthropic (configurable via adapter)
+- **LLM**: Local Ollama by default (OpenAI-compatible adapter); hosted OpenAI/Anthropic/Gemini providers remain configurable
 - **Migrations**: node-pg-migrate or Prisma (I'll use plain SQL migrations with node-pg for simplicity)
 
 ## Project Structure
@@ -128,11 +128,10 @@ Implement:
 ## Phase 3: AI Agent
 
 ### 3.1 LLM Provider Adapter
-- [ ] Abstract interface: `LLMProvider` with `complete`, `stream` methods
-- [ ] OpenAI adapter implementation
-- [ ] Anthropic adapter (optional but good)
-- [ ] Config via env (provider, model, api key)
-- [ ] **Commit:** `feat(agent): add LLM provider abstraction`
+- [x] `LLMProvider` interface and OpenAI-compatible, Anthropic, and Gemini adapters with tool calling
+- [x] Configuration through environment variables (provider, model, API key, compatible base URL)
+- [x] Local Ollama through the OpenAI-compatible adapter; Docker default model is `qwen3:1.7b` for this machine’s CPU/RAM
+- [ ] Add streaming support and retry/repair for invalid structured output
 
 ### 3.2 Agent Core
 - [ ] Tool-calling loop (function calling / tool use)
@@ -296,8 +295,10 @@ REDIS_URL=redis://...
 PORT=3001 (api)
 NEXT_PUBLIC_API_URL=http://localhost:3001
 LLM_PROVIDER=openai
-OPENAI_API_KEY=...
-LLM_MODEL=gpt-4o-mini
+OPENAI_API_KEY=ollama-local
+LLM_MODEL=qwen3:1.7b
+LLM_BASE_URL=http://localhost:11434/v1
+LLM_BASE_URL_DOCKER=http://ollama:11434/v1
 NODE_ENV=development
 ```
 

@@ -1,8 +1,10 @@
 export const EMBEDDING_DIMENSIONS = 1536;
 
 function embeddingConfig() {
-  const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
-  if (!apiKey) throw new Error('OPENAI_API_KEY or LLM_API_KEY is required for vector retrieval.');
+  const apiKey =
+    process.env.OPENAI_EMBEDDING_API_KEY ||
+    (process.env.OPENAI_API_KEY !== 'ollama-local' ? process.env.OPENAI_API_KEY : undefined);
+  if (!apiKey) throw new Error('OPENAI_EMBEDDING_API_KEY is required for vector retrieval.');
 
   return {
     apiKey,

@@ -10,13 +10,13 @@
 | Fact | Detail |
 |---|---|
 | Branch | `main`; local commits have not been pushed |
-| Latest implementation commit | `4ceaec8` — preserve Gemini tool-call thought signatures |
+| Latest implementation commit | Local Ollama/Qwen 3 1.7B support |
 | Committed so far | Database, agent, API, worker, dashboard, pgvector retrieval, replay evaluation, docs, and container setup |
-| **Not committed** | None |
+| **Not committed** | Local Ollama provider configuration, embedding credential guard, and docs |
 
-**Verification (2026-10-17):** The replacement Gemini key is present locally and a generic generation probe succeeded with `gemini-3.8-flash`. The seven-case isolated replay scored 7/7, but Gemini free-tier quota (5 requests/minute) was exhausted during the run, so those cases used the deterministic fallback; this is not an LLM evaluation result. The Gemini tool-call adapter now preserves `extra_content.google.thought_signature` as required for Gemini 3 tool round trips; the agent package TypeScript build passed. A full workspace build reached Next.js but failed with Windows `EPERM` writing under `apps/web/.next`, and `npm test` has no workspace test scripts. The read-only API health and exceptions endpoints responded successfully. A Gemini-backed replay and live worker run remain unverified; the normal compose worker was not started because it may process real queued finance records and send them to Google.
+**Verification (2026-10-17):** Local Ollama is running in Docker with `qwen3:1.7b` downloaded and configured as the default (CPU inference, 4K context, one parallel request, 15-minute model-load timeout). The API is configured to call `http://ollama:11434/v1` and its health endpoint responds successfully. A synthetic two-step tool round trip passed through the project OpenAI-compatible adapter: Qwen called `lookup_invoice`, received a synthetic `paid` result, and answered from it. The Qwen 3 4B model could not complete warmup within the runner startup window on this machine, so it is retained in Ollama's local volume but is not the configured default. The embedding client requires a dedicated embedding key (or a non-placeholder hosted key), so local Ollama setup cannot accidentally send remittance text to a hosted embedding API. No real customer data was used. Earlier Gemini and workspace build limitations remain historical; no full workspace test suite is defined.
 
-**Local runtime:** Postgres, Redis, API, and the fallback-only worker are running. The normal Gemini-configured worker remains stopped because it may process real queued finance records. Existing demo rows were preserved; the seed reset was not run.
+**Local runtime:** Postgres, Redis, API, and Ollama are running. The normal worker remains stopped; existing demo rows were preserved and no seed reset was run.
 
 ---
 

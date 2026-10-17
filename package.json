@@ -17,7 +17,7 @@
     "dev:web": "npm run dev -w @cashflow/web",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "docker:up": "docker compose up -d postgres redis",
+    "docker:up": "docker compose up -d postgres redis ollama",
     "docker:down": "docker compose down"
   }
 }
